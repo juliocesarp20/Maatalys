@@ -1,16 +1,23 @@
-from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
-from src.parameter_search.models import ParameterSearch
-from src.parameter_search.schemas import ParameterSearchCreate
-from src.db.session import DbSession
-from typing import List, Optional
 import logging
 import uuid
+from typing import List, Optional
+
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.future import select
+
+from src.db.session import DbSession
+from src.parameter_search.models import ParameterSearch
+from src.parameter_search.schemas import ParameterSearchCreate
 
 logger = logging.getLogger(__name__)
 
-async def create_parameter_search(db: DbSession, parameter_search_data: ParameterSearchCreate) -> Optional[ParameterSearch]:
-    logger.info(f"Creating parameter_search with search_id: {parameter_search_data.search_id} and value: {parameter_search_data.value}")
+
+async def create_parameter_search(
+    db: DbSession, parameter_search_data: ParameterSearchCreate
+) -> Optional[ParameterSearch]:
+    logger.info(
+        f"Creating parameter_search with search_id: {parameter_search_data.search_id} and value: {parameter_search_data.value}"
+    )
     new_parameter_search = ParameterSearch(
         search_id=parameter_search_data.search_id,
         parameter_id=parameter_search_data.parameter_id,
@@ -27,7 +34,10 @@ async def create_parameter_search(db: DbSession, parameter_search_data: Paramete
         await db.rollback()
         raise RuntimeError("Database error: Unable to create ParameterSearch.")
 
-async def get_parameter_search_by_id(db: DbSession, parameter_search_id: uuid.UUID) -> Optional[ParameterSearch]:
+
+async def get_parameter_search_by_id(
+    db: DbSession, parameter_search_id: uuid.UUID
+) -> Optional[ParameterSearch]:
     logger.debug(f"Fetching parameter_search by ID: {parameter_search_id}")
     try:
         result = await db.execute(
@@ -38,7 +48,10 @@ async def get_parameter_search_by_id(db: DbSession, parameter_search_id: uuid.UU
         logger.error(f"Database error occurred while fetching ParameterSearch: {e}")
         raise RuntimeError("Database error: Unable to fetch ParameterSearch.")
 
-async def list_parameter_searches_for_search(db: DbSession, search_id: uuid.UUID) -> List[ParameterSearch]:
+
+async def list_parameter_searches_for_search(
+    db: DbSession, search_id: uuid.UUID
+) -> List[ParameterSearch]:
     logger.debug(f"Listing parameter_searches for search_id: {search_id}")
     try:
         result = await db.execute(
@@ -49,7 +62,10 @@ async def list_parameter_searches_for_search(db: DbSession, search_id: uuid.UUID
         logger.error(f"Database error occurred while listing ParameterSearches: {e}")
         raise RuntimeError("Database error: Unable to list ParameterSearches.")
 
-async def delete_parameter_search(db: DbSession, parameter_search_id: uuid.UUID) -> bool:
+
+async def delete_parameter_search(
+    db: DbSession, parameter_search_id: uuid.UUID
+) -> bool:
     logger.info(f"Deleting parameter_search ID: {parameter_search_id}")
     try:
         result = await db.execute(
@@ -59,7 +75,9 @@ async def delete_parameter_search(db: DbSession, parameter_search_id: uuid.UUID)
         if parameter_search:
             await db.delete(parameter_search)
             await db.commit()
-            logger.info(f"ParameterSearch ID {parameter_search_id} deleted successfully.")
+            logger.info(
+                f"ParameterSearch ID {parameter_search_id} deleted successfully."
+            )
             return True
         else:
             logger.warning(f"ParameterSearch ID {parameter_search_id} not found.")

@@ -1,6 +1,8 @@
-from starlette.middleware.base import BaseHTTPMiddleware
-from src.db.session import get_async_session
 from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from src.db.session import get_async_session
+
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

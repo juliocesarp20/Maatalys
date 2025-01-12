@@ -1,6 +1,7 @@
 from fastapi.security import OAuth2PasswordBearer
 from pydantic_settings import BaseSettings
 
+
 class AuthSettings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
