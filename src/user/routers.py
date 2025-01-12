@@ -1,15 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
+
+from src.db.session import DbSession
 from src.user.schemas import UserCreate, UserResponse
 from src.user.services import UserService
-from src.db.session import DbSession
 
 router = APIRouter()
+
 
 @router.post("/register", response_model=UserResponse)
 async def register_user(
     user: UserCreate,
     db: DbSession,
-    user_service: UserService = Depends()
+    user_service: Annotated[UserService, Depends(UserService)],
 ):
     existing_user = await user_service.get_user_by_username(db, user.username)
     if existing_user:

@@ -1,24 +1,25 @@
-from sqlalchemy.future import select
+import logging
+from typing import List, Optional
+from uuid import UUID
+
+from fastapi import Depends
 from sqlalchemy.exc import SQLAlchemyError
-from src.parameter_search.models import ParameterSearch
-from src.search.models import Search
-from src.parameter.models import Parameter
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+
+from src.db.session import DbSession
 from src.investigation.models import Investigation
 from src.investigation.schemas import InvestigationCreate
-from src.db.session import DbSession
-from uuid import UUID
-from typing import Optional, List
-import logging
-from fastapi import Depends
-logger = logging.getLogger(__name__)
-
-import logging
+from src.parameter.models import Parameter
+from src.parameter_search.models import ParameterSearch
+from src.search.models import Search
 
 logger = logging.getLogger(__name__)
 
-from sqlalchemy.future import select
-from sqlalchemy.exc import SQLAlchemyError
 from src.parameter.services import ParameterService
+
+parameter_service = ParameterService()
+
 
 class InvestigationService:
     async def create_investigation(
@@ -26,22 +27,83 @@ class InvestigationService:
         db: DbSession,
         investigation_data: InvestigationCreate,
         user_id: UUID,
-        parameter_service: ParameterService = Depends(),
     ) -> Investigation:
         logger.info(f"Creating investigation: {investigation_data.name}")
 
-        pass
+        try:
+            parameter_names = {
+                param.name
+                for search in investigation_data.searches
+                for param in search.parameters
+                if param.name
+            }
+            existing_parameters = await db.execute(
+                select(Parameter).filter(Parameter.name.in_(parameter_names))
+            )
+            parameter_map = {
+                param.name: param for param in existing_parameters.scalars()
+            }
+
+            missing_parameter_names = parameter_names - parameter_map.keys()
+            if missing_parameter_names:
+                new_parameters = await parameter_service.create_parameters(
+                    db, list(missing_parameter_names), auto_commit=False
+                )
+                parameter_map.update({param.name: param for param in new_parameters})
+
+            new_investigation = Investigation(
+                name=investigation_data.name,
+                user_id=user_id,
+                searches=[
+                    Search(
+                        source=search_data.source,
+                        parameter_searches=[
+                            ParameterSearch(
+                                parameter_id=parameter_map[param.name].id,
+                                value=param.value,
+                            )
+                            for param in search_data.parameters
+                            if param.name in parameter_map
+                        ],
+                    )
+                    for search_data in investigation_data.searches
+                ],
+            )
+            db.add(new_investigation)
+
+            await db.commit()
+
+            await db.refresh(new_investigation, ["user", "searches"])
+            for search in new_investigation.searches:
+                await db.refresh(search, ["parameter_searches"])
+
+            logger.info(
+                f"Investigation {investigation_data.name} created successfully."
+            )
+            return new_investigation
+
+        except SQLAlchemyError as e:
+            logger.error(f"Database error while creating investigation: {e}")
+            await db.rollback()
+            raise RuntimeError("Database error: Unable to create investigation.")
 
     async def get_investigation_by_id(
         self, db: DbSession, investigation_id: UUID
     ) -> Optional[Investigation]:
         """
-        Fetch an investigation by its ID.
+        Fetch an investigation by its ID with eager loading.
         """
         logger.debug(f"Fetching investigation by ID: {investigation_id}")
         try:
             result = await db.execute(
-                select(Investigation).filter(Investigation.id == investigation_id)
+                select(Investigation)
+                .options(
+                    selectinload(Investigation.user),
+                    selectinload(Investigation.searches).selectinload(
+                        Search.parameter_searches
+                    ),
+                )
+                .filter(Investigation.id == investigation_id)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
@@ -52,37 +114,21 @@ class InvestigationService:
         self, db: DbSession, user_id: UUID
     ) -> List[Investigation]:
         """
-        List all investigations for a specific user.
+        List all investigations for a specific user with eager loading.
         """
         logger.debug(f"Listing investigations for user ID: {user_id}")
         try:
             result = await db.execute(
-                select(Investigation).filter(Investigation.user_id == user_id)
+                select(Investigation)
+                .options(
+                    selectinload(Investigation.user),
+                    selectinload(Investigation.searches).selectinload(
+                        Search.parameter_searches
+                    ),
+                )
+                .filter(Investigation.user_id == user_id)
             )
             return result.scalars().all()
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while listing investigations: {e}")
             raise RuntimeError("Database error: Unable to list investigations.")
-
-    async def delete_investigation(self, db: DbSession, investigation_id: UUID) -> bool:
-        """
-        Delete an investigation by its ID.
-        """
-        logger.info(f"Deleting investigation ID: {investigation_id}")
-        try:
-            result = await db.execute(
-                select(Investigation).filter(Investigation.id == investigation_id)
-            )
-            investigation = result.scalar_one_or_none()
-            if investigation:
-                await db.delete(investigation)
-                await db.commit()
-                logger.info(f"Investigation ID {investigation_id} deleted successfully.")
-                return True
-            else:
-                logger.warning(f"Investigation ID {investigation_id} not found.")
-                return False
-        except SQLAlchemyError as e:
-            logger.error(f"Database error occurred while deleting investigation: {e}")
-            await db.rollback()
-            raise RuntimeError("Database error: Unable to delete investigation.")
