@@ -1,20 +1,21 @@
-from typing import Dict
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel
 
+from src.parameter_search.schemas import ParameterSearchCreate, ParameterSearchResponse
+
 
 class SearchBase(BaseModel):
     source: str
-    parameters: Dict[str, str]
+    parameters: List[ParameterSearchCreate]
 
 
 class SearchCreate(SearchBase):
-    investigation_id: UUID
+    pass
 
 
-class SearchResponse(SearchBase):
+class SearchResponse(BaseModel):
     id: UUID
-
-    class Config:
-        from_attributes = True
+    source: str
+    parameter_searches: List[ParameterSearchResponse]

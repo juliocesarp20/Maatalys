@@ -56,7 +56,7 @@ class ParameterService:
                 for param in new_parameters:
                     await db.refresh(param)
             else:
-                await db.flush()  # Just flush to get IDs without committing
+                await db.flush()
 
             return new_parameters
         except SQLAlchemyError as e:

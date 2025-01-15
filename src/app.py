@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic_settings import BaseSettings
@@ -9,6 +9,7 @@ from src.auth.routers import router as auth_router
 from src.investigation.routers import router as investigation_router
 from src.logger import configure_logging
 from src.middleware.db_middleware import DBSessionMiddleware
+from src.streaming.kafka_producer_service import KafkaProducerService, KafkaSettings
 from src.user.routers import router as user_router
 
 
@@ -46,3 +47,19 @@ app.add_middleware(DBSessionMiddleware)
 def read_root():
     logger.info("Root endpoint accessed.")
     return {"message": "Welcome to the API"}
+
+
+kafka_settings = KafkaSettings()
+kafka_producer_service = KafkaProducerService(kafka_settings)
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting application...")
+    await kafka_producer_service.start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Shutting down application...")
+    await kafka_producer_service.stop()

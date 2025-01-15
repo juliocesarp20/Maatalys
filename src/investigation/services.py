@@ -2,17 +2,17 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import Depends
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from src.db.session import DbSession
 from src.investigation.models import Investigation
-from src.investigation.schemas import InvestigationCreate
+from src.investigation.schemas import InvestigationCreate, InvestigationResponse
 from src.parameter.models import Parameter
 from src.parameter_search.models import ParameterSearch
 from src.search.models import Search
+from src.streaming.event_producer_service import EventProducerService
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class InvestigationService:
         db: DbSession,
         investigation_data: InvestigationCreate,
         user_id: UUID,
+        event_producer: EventProducerService,
     ) -> Investigation:
         logger.info(f"Creating investigation: {investigation_data.name}")
 
@@ -47,7 +48,7 @@ class InvestigationService:
             missing_parameter_names = parameter_names - parameter_map.keys()
             if missing_parameter_names:
                 new_parameters = await parameter_service.create_parameters(
-                    db, list(missing_parameter_names), auto_commit=False
+                    list(missing_parameter_names), auto_commit=False
                 )
                 parameter_map.update({param.name: param for param in new_parameters})
 
@@ -80,7 +81,21 @@ class InvestigationService:
             logger.info(
                 f"Investigation {investigation_data.name} created successfully."
             )
-            return new_investigation
+            import json
+
+            investigation_response = InvestigationResponse.model_validate(
+                new_investigation
+            )
+            await event_producer.publish(
+                "abc",
+                json.dumps(
+                    {
+                        "id": str(investigation_response.id),
+                        "name": investigation_response.name,
+                    }
+                ),
+            )
+            return investigation_response
 
         except SQLAlchemyError as e:
             logger.error(f"Database error while creating investigation: {e}")
