@@ -19,7 +19,7 @@ class UserService:
         logger.info(f"Creating new user with username: {user_data.username}")
         hashed_password = PasswordManager.hash_password(
             user_data.password
-        )  # Static method
+        )
         new_user = User(
             username=user_data.username,
             hashed_password=hashed_password,
