@@ -9,12 +9,14 @@ from src.auth.routers import router as auth_router
 from src.investigation.routers import router as investigation_router
 from src.logger import configure_logging
 from src.middleware.db_middleware import DBSessionMiddleware
+from src.search.routers import router as search_router
+from src.streaming.kafka_consumer_service import KafkaConsumerService
 from src.streaming.kafka_producer_service import KafkaProducerService, KafkaSettings
 from src.user.routers import router as user_router
 
 
 class AppSettings(BaseSettings):
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str = "ERROR"
 
 
 settings = AppSettings()
@@ -40,6 +42,7 @@ app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(
     investigation_router, prefix="/investigation", tags=["Investigation"]
 )
+app.include_router(search_router, prefix="/search", tags=["Search"])
 app.add_middleware(DBSessionMiddleware)
 
 
@@ -51,15 +54,21 @@ def read_root():
 
 kafka_settings = KafkaSettings()
 kafka_producer_service = KafkaProducerService(kafka_settings)
+kafka_consumer_service = KafkaConsumerService(settings=kafka_settings)
 
 
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting application...")
     await kafka_producer_service.start()
+    await kafka_consumer_service.start()
+    import asyncio
+
+    asyncio.create_task(kafka_consumer_service.consume())
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Shutting down application...")
     await kafka_producer_service.stop()
+    await kafka_consumer_service.stop()

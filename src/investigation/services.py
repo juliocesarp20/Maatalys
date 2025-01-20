@@ -48,7 +48,9 @@ class InvestigationService:
             missing_parameter_names = parameter_names - parameter_map.keys()
             if missing_parameter_names:
                 new_parameters = await parameter_service.create_parameters(
-                    list(missing_parameter_names), auto_commit=False
+                    db=db,
+                    parameter_names=list(missing_parameter_names),
+                    auto_commit=False,
                 )
                 parameter_map.update({param.name: param for param in new_parameters})
 

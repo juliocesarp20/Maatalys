@@ -8,7 +8,7 @@ from src.db.session import DbSession
 from src.investigation.schemas import InvestigationCreate, InvestigationResponse
 from src.investigation.services import InvestigationService
 from src.streaming.event_producer_service import EventProducerService
-from src.streaming.kafka_producer_service import get_kafka_producer
+from src.streaming.kafka_producer_service import KafkaProducer
 
 router = APIRouter()
 
@@ -23,7 +23,7 @@ async def create_new_investigation(
     investigation_service: Annotated[
         InvestigationService, Depends(InvestigationService)
     ],
-    kafka_producer: Annotated[EventProducerService, Depends(get_kafka_producer)],
+    kafka_producer: KafkaProducer,
 ):
     investigation = await investigation_service.create_investigation(
         db, investigation, current_user.id, kafka_producer

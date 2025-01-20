@@ -8,11 +8,17 @@ from sqlalchemy.future import select
 from src.db.session import DbSession
 from src.search.models import Search
 from src.search.schemas import SearchCreate
+from src.search.search_topics import SearchTopics
+from src.streaming.event_registry import EventRegistry
 
 logger = logging.getLogger(__name__)
 
 
 class SearchService:
+    @staticmethod
+    async def handle_search(payload: dict):
+        logger.info(f"Processing search payload: {payload}")
+
     async def create_search(
         self, db: DbSession, search_data: SearchCreate
     ) -> Optional[Search]:
@@ -86,3 +92,6 @@ class SearchService:
             logger.error(f"Database error occurred while deleting search: {e}")
             await db.rollback()
             raise RuntimeError("Database error: Unable to delete search.")
+
+
+EventRegistry.register(SearchTopics.SEARCH_CONSUMER.value, SearchService.handle_search)
