@@ -25,10 +25,10 @@ class Search(Base):
         nullable=False,
     )
 
-    dt_creation: Mapped[datetime] = mapped_column(
+    dt_created: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    dt_processing: Mapped[datetime | None] = mapped_column(
+    dt_processed: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     dt_finished: Mapped[datetime | None] = mapped_column(

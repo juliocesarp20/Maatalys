@@ -20,7 +20,7 @@ async def login_for_access_token(
     auth_service: Annotated[AuthService, Depends(AuthService)],
 ):
     user = await auth_service.authenticate_user(
-        db, form_data.nm_user, form_data.password
+        db, form_data.username, form_data.password
     )
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect nm_user or password")
