@@ -19,10 +19,10 @@ class ParameterService:
         """
         Create a new parameter and persist it to the database.
         """
-        logger.info(f"Creating parameter: {parameter_data.name}")
+        logger.info(f"Creating parameter: {parameter_data.nm_parameter}")
         new_parameter = Parameter(
-            name=parameter_data.name,
-            value=parameter_data.value,
+            nm_parameter=parameter_data.nm_parameter,
+            ds_parameter=parameter_data.ds_parameter,
         )
         try:
             db.add(new_parameter)
@@ -66,15 +66,15 @@ class ParameterService:
             raise RuntimeError("Database error: Unable to create parameters.")
 
     async def get_parameter_by_id(
-        self, db: DbSession, parameter_id: uuid.UUID
+        self, db: DbSession, id_parameter: uuid.UUID
     ) -> Optional[Parameter]:
         """
         Fetch a parameter by its ID.
         """
-        logger.debug(f"Fetching parameter by ID: {parameter_id}")
+        logger.debug(f"Fetching parameter by ID: {id_parameter}")
         try:
             result = await db.execute(
-                select(Parameter).filter(Parameter.id == parameter_id)
+                select(Parameter).filter(Parameter.id == id_parameter)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
@@ -93,23 +93,23 @@ class ParameterService:
             logger.error(f"Database error occurred while listing parameters: {e}")
             raise RuntimeError("Database error: Unable to list parameters.")
 
-    async def delete_parameter(self, db: DbSession, parameter_id: uuid.UUID) -> bool:
+    async def delete_parameter(self, db: DbSession, id_parameter: uuid.UUID) -> bool:
         """
         Delete a parameter by its ID.
         """
-        logger.info(f"Deleting parameter ID: {parameter_id}")
+        logger.info(f"Deleting parameter ID: {id_parameter}")
         try:
             result = await db.execute(
-                select(Parameter).filter(Parameter.id == parameter_id)
+                select(Parameter).filter(Parameter.id == id_parameter)
             )
             parameter = result.scalar_one_or_none()
             if parameter:
                 await db.delete(parameter)
                 await db.commit()
-                logger.info(f"Parameter ID {parameter_id} deleted successfully.")
+                logger.info(f"Parameter ID {id_parameter} deleted successfully.")
                 return True
             else:
-                logger.warning(f"Parameter ID {parameter_id} not found.")
+                logger.warning(f"Parameter ID {id_parameter} not found.")
                 return False
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while deleting parameter: {e}")

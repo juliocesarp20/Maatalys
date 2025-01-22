@@ -30,13 +30,13 @@ async def get_all_parameters(
     return await parameter_service.list_parameters(db)
 
 
-@router.get("/{parameter_id}", response_model=ParameterResponse)
+@router.get("/{id_parameter}", response_model=ParameterResponse)
 async def get_parameter(
-    parameter_id: UUID,
+    id_parameter: UUID,
     db: DbSession,
     parameter_service: Annotated[ParameterService, Depends(ParameterService)],
 ):
-    parameter = await parameter_service.get_parameter_by_id(db, parameter_id)
+    parameter = await parameter_service.get_parameter_by_id(db, id_parameter)
     if not parameter:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Parameter not found."
@@ -44,13 +44,13 @@ async def get_parameter(
     return parameter
 
 
-@router.delete("/{parameter_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id_parameter}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_parameter_by_id(
-    parameter_id: UUID,
+    id_parameter: UUID,
     db: DbSession,
     parameter_service: Annotated[ParameterService, Depends(ParameterService)],
 ):
-    success = await parameter_service.delete_parameter(db, parameter_id)
+    success = await parameter_service.delete_parameter(db, id_parameter)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Parameter not found."

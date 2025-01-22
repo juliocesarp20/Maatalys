@@ -11,16 +11,16 @@ from src.search.models import Search  # Ensure the Search model is imported
 class ParameterSearch(Base):
     __tablename__ = "parameter_search"
 
-    id: Mapped[uuid.UUID] = mapped_column(
+    id_parameter_search: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
-    search_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("search.id"), nullable=False
+    id_search: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("search.id_search"), nullable=False
     )
-    parameter_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("parameter.id"), nullable=False
+    id_parameter: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("parameter.id_parameter"), nullable=False
     )
-    value: Mapped[str] = mapped_column(String, nullable=False)
+    vl_parameter_search: Mapped[str] = mapped_column(String, nullable=False)
 
     search: Mapped["Search"] = relationship(
         "Search", back_populates="parameter_searches"

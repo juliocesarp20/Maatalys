@@ -26,23 +26,23 @@ class InvestigationService:
         self,
         db: DbSession,
         investigation_data: InvestigationCreate,
-        user_id: UUID,
+        id_user: UUID,
         event_producer: EventProducerService,
     ) -> Investigation:
-        logger.info(f"Creating investigation: {investigation_data.name}")
+        logger.info(f"Creating investigation: {investigation_data.nm_investigation}")
 
         try:
             parameter_names = {
-                param.name
+                param.nm_parameter
                 for search in investigation_data.searches
                 for param in search.parameters
-                if param.name
+                if param.nm_parameter
             }
             existing_parameters = await db.execute(
-                select(Parameter).filter(Parameter.name.in_(parameter_names))
+                select(Parameter).filter(Parameter.nm_parameter.in_(parameter_names))
             )
             parameter_map = {
-                param.name: param for param in existing_parameters.scalars()
+                param.nm_parameter: param for param in existing_parameters.scalars()
             }
 
             missing_parameter_names = parameter_names - parameter_map.keys()
@@ -52,21 +52,23 @@ class InvestigationService:
                     parameter_names=list(missing_parameter_names),
                     auto_commit=False,
                 )
-                parameter_map.update({param.name: param for param in new_parameters})
+                parameter_map.update(
+                    {param.nm_parameter: param for param in new_parameters}
+                )
 
             new_investigation = Investigation(
-                name=investigation_data.name,
-                user_id=user_id,
+                nm_investigation=investigation_data.nm_investigation,
+                id_user=id_user,
                 searches=[
                     Search(
                         source=search_data.source,
                         parameter_searches=[
                             ParameterSearch(
-                                parameter_id=parameter_map[param.name].id,
-                                value=param.value,
+                                id_parameter=parameter_map[param.nm_parameter].id,
+                                value=param.vl_parameter_search,
                             )
                             for param in search_data.parameters
-                            if param.name in parameter_map
+                            if param.nm_parameter in parameter_map
                         ],
                     )
                     for search_data in investigation_data.searches
@@ -81,7 +83,7 @@ class InvestigationService:
                 await db.refresh(search, ["parameter_searches"])
 
             logger.info(
-                f"Investigation {investigation_data.name} created successfully."
+                f"Investigation {investigation_data.nm_investigation} created successfully."
             )
             import json
 
@@ -93,7 +95,7 @@ class InvestigationService:
                 json.dumps(
                     {
                         "id": str(investigation_response.id),
-                        "name": investigation_response.name,
+                        "name": investigation_response.nm_investigation,
                     }
                 ),
             )
@@ -105,12 +107,12 @@ class InvestigationService:
             raise RuntimeError("Database error: Unable to create investigation.")
 
     async def get_investigation_by_id(
-        self, db: DbSession, investigation_id: UUID
+        self, db: DbSession, id_investigation: UUID
     ) -> Optional[Investigation]:
         """
         Fetch an investigation by its ID with eager loading.
         """
-        logger.debug(f"Fetching investigation by ID: {investigation_id}")
+        logger.debug(f"Fetching investigation by ID: {id_investigation}")
         try:
             result = await db.execute(
                 select(Investigation)
@@ -120,7 +122,7 @@ class InvestigationService:
                         Search.parameter_searches
                     ),
                 )
-                .filter(Investigation.id == investigation_id)
+                .filter(Investigation.id == id_investigation)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
@@ -128,12 +130,12 @@ class InvestigationService:
             raise RuntimeError("Database error: Unable to fetch investigation.")
 
     async def list_investigations(
-        self, db: DbSession, user_id: UUID
+        self, db: DbSession, id_user: UUID
     ) -> List[Investigation]:
         """
         List all investigations for a specific user with eager loading.
         """
-        logger.debug(f"Listing investigations for user ID: {user_id}")
+        logger.debug(f"Listing investigations for user ID: {id_user}")
         try:
             result = await db.execute(
                 select(Investigation)
@@ -143,7 +145,7 @@ class InvestigationService:
                         Search.parameter_searches
                     ),
                 )
-                .filter(Investigation.user_id == user_id)
+                .filter(Investigation.id_user == id_user)
             )
             return result.scalars().all()
         except SQLAlchemyError as e:

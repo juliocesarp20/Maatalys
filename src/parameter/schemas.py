@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class ParameterBase(BaseModel):
-    name: str
-    description: Optional[str]
+    nm_parameter: str
+    ds_parameter: Optional[str]
 
 
 class ParameterCreate(ParameterBase):

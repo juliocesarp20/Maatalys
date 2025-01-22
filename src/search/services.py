@@ -18,6 +18,7 @@ class SearchService:
     @staticmethod
     async def handle_search(payload: dict):
         logger.info(f"Processing search payload: {payload}")
+        raise Exception("falhou")
 
     async def create_search(
         self, db: DbSession, search_data: SearchCreate
@@ -27,7 +28,7 @@ class SearchService:
         """
         logger.info(f"Creating search with source: {search_data.source}")
         new_search = Search(
-            investigation_id=search_data.investigation_id,
+            id_investigation=search_data.id_investigation,
             source=search_data.source,
             parameters=search_data.parameters,
         )
@@ -43,50 +44,50 @@ class SearchService:
             raise RuntimeError("Database error: Unable to create search.")
 
     async def get_search_by_id(
-        self, db: DbSession, search_id: uuid.UUID
+        self, db: DbSession, id_search: uuid.UUID
     ) -> Optional[Search]:
         """
         Fetch a search by its ID.
         """
-        logger.debug(f"Fetching search by ID: {search_id}")
+        logger.debug(f"Fetching search by ID: {id_search}")
         try:
-            result = await db.execute(select(Search).filter(Search.id == search_id))
+            result = await db.execute(select(Search).filter(Search.id == id_search))
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while fetching search: {e}")
             raise RuntimeError("Database error: Unable to fetch search.")
 
     async def list_searches_by_investigation(
-        self, db: DbSession, investigation_id: uuid.UUID
+        self, db: DbSession, id_investigation: uuid.UUID
     ) -> List[Search]:
         """
         List all searches for a specific investigation.
         """
-        logger.debug(f"Listing searches for investigation ID: {investigation_id}")
+        logger.debug(f"Listing searches for investigation ID: {id_investigation}")
         try:
             result = await db.execute(
-                select(Search).filter(Search.investigation_id == investigation_id)
+                select(Search).filter(Search.id_investigation == id_investigation)
             )
             return result.scalars().all()
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while listing searches: {e}")
             raise RuntimeError("Database error: Unable to list searches.")
 
-    async def delete_search(self, db: DbSession, search_id: uuid.UUID) -> bool:
+    async def delete_search(self, db: DbSession, id_search: uuid.UUID) -> bool:
         """
         Delete a search by its ID.
         """
-        logger.info(f"Deleting search ID: {search_id}")
+        logger.info(f"Deleting search ID: {id_search}")
         try:
-            result = await db.execute(select(Search).filter(Search.id == search_id))
+            result = await db.execute(select(Search).filter(Search.id == id_search))
             search = result.scalar_one_or_none()
             if search:
                 await db.delete(search)
                 await db.commit()
-                logger.info(f"Search ID {search_id} deleted successfully.")
+                logger.info(f"Search ID {id_search} deleted successfully.")
                 return True
             else:
-                logger.warning(f"Search ID {search_id} not found.")
+                logger.warning(f"Search ID {id_search} not found.")
                 return False
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while deleting search: {e}")

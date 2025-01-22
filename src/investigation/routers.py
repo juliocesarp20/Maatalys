@@ -31,15 +31,15 @@ async def create_new_investigation(
     return investigation
 
 
-@router.get("/{investigation_id}", response_model=InvestigationResponse)
+@router.get("/{id_investigation}", response_model=InvestigationResponse)
 async def get_investigation(
-    investigation_id: UUID,
+    id_investigation: UUID,
     db: DbSession,
     investigation_service: Annotated[
         InvestigationService, Depends(InvestigationService)
     ],
 ):
-    return await investigation_service.get_investigation_by_id(db, investigation_id)
+    return await investigation_service.get_investigation_by_id(db, id_investigation)
 
 
 @router.get("/", response_model=List[InvestigationResponse])

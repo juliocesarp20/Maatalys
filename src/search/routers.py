@@ -22,36 +22,36 @@ async def create_new_search(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{search_id}", response_model=SearchResponse)
+@router.get("/{id_search}", response_model=SearchResponse)
 async def get_search(
-    search_id: UUID,
+    id_search: UUID,
     db: DbSession,
     search_service: Annotated[SearchService, Depends(SearchService)],
 ):
-    search = await search_service.get_search_by_id(db, search_id)
+    search = await search_service.get_search_by_id(db, id_search)
     if not search:
         raise HTTPException(status_code=404, detail="Search not found.")
     return search
 
 
-@router.get("/investigation/{investigation_id}", response_model=List[SearchResponse])
+@router.get("/investigation/{id_investigation}", response_model=List[SearchResponse])
 async def get_searches_for_investigation(
-    investigation_id: UUID,
+    id_investigation: UUID,
     db: DbSession,
     search_service: Annotated[SearchService, Depends(SearchService)],
 ):
     try:
-        return await search_service.list_searches_by_investigation(db, investigation_id)
+        return await search_service.list_searches_by_investigation(db, id_investigation)
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{search_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id_search}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_search_by_id(
-    search_id: UUID,
+    id_search: UUID,
     db: DbSession,
     search_service: Annotated[SearchService, Depends(SearchService)],
 ):
-    success = await search_service.delete_search(db, search_id)
+    success = await search_service.delete_search(db, id_search)
     if not success:
         raise HTTPException(status_code=404, detail="Search not found.")

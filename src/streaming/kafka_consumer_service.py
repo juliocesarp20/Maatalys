@@ -17,7 +17,7 @@ class KafkaConsumerService(EventConsumerService):
         self.settings = settings
         self.consumer = None
         self.running = True
-        self.poll_interval = poll_interval  # Time interval to check for new topics
+        self.poll_interval = poll_interval
 
     def _get_topic_handlers(self) -> Dict[str, Callable]:
         """Fetch the topic handlers from EventRegistry."""
@@ -64,6 +64,7 @@ class KafkaConsumerService(EventConsumerService):
             while self.running:
                 await self._update_topics()
                 async for message in self.consumer:
+                    print("abcde")
                     if not self.running:
                         break
 

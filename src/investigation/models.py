@@ -10,12 +10,12 @@ from src.user.models import User
 class Investigation(Base):
     __tablename__ = "investigation"
 
-    id: Mapped[uuid.UUID] = mapped_column(
+    id_investigation: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True
     )
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("user.id"), nullable=False
+    nm_investigation: Mapped[str] = mapped_column(String, nullable=False)
+    id_user: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("user.id_user"), nullable=False
     )
 
     user: Mapped["User"] = relationship("User", back_populates="investigations")

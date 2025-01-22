@@ -5,25 +5,25 @@ from pydantic import BaseModel, model_validator
 
 
 class ParameterSearchBase(BaseModel):
-    search_id: UUID
-    parameter_id: UUID
-    value: str
+    id_search: UUID
+    id_parameter: UUID
+    vl_parameter_search: str
 
 
 class ParameterSearchCreate(BaseModel):
-    parameter_id: Optional[UUID] = None
-    name: Optional[str] = None
-    value: str
+    id_parameter: Optional[UUID] = None
+    id_search: Optional[str] = None
+    vl_parameter_search: str
 
     @model_validator(mode="before")
     @classmethod
     def validate_one_of_required(cls, values):
-        if not values.get("parameter_id") and not values.get("name"):
-            raise ValueError("Either 'parameter_id' or 'name' must be provided.")
+        if not values.get("id_parameter") and not values.get("name"):
+            raise ValueError("Either 'id_parameter' or 'name' must be provided.")
         return values
 
 
 class ParameterSearchResponse(ParameterSearchBase):
     id: UUID
-    parameter_id: UUID
+    id_parameter: UUID
     value: str

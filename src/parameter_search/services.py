@@ -16,12 +16,12 @@ async def create_parameter_search(
     db: DbSession, parameter_search_data: ParameterSearchCreate
 ) -> Optional[ParameterSearch]:
     logger.info(
-        f"Creating parameter_search with search_id: {parameter_search_data.search_id} and value: {parameter_search_data.value}"
+        f"Creating parameter_search with id_search: {parameter_search_data.id_search} and value: {parameter_search_data.vl_parameter_search}"
     )
     new_parameter_search = ParameterSearch(
-        search_id=parameter_search_data.search_id,
-        parameter_id=parameter_search_data.parameter_id,
-        value=parameter_search_data.value,
+        id_search=parameter_search_data.id_search,
+        id_parameter=parameter_search_data.id_parameter,
+        vl_parameter_search=parameter_search_data.vl_parameter_search,
     )
     try:
         db.add(new_parameter_search)
@@ -36,12 +36,12 @@ async def create_parameter_search(
 
 
 async def get_parameter_search_by_id(
-    db: DbSession, parameter_search_id: uuid.UUID
+    db: DbSession, id_parameter_search: uuid.UUID
 ) -> Optional[ParameterSearch]:
-    logger.debug(f"Fetching parameter_search by ID: {parameter_search_id}")
+    logger.debug(f"Fetching parameter_search by ID: {id_parameter_search}")
     try:
         result = await db.execute(
-            select(ParameterSearch).filter(ParameterSearch.id == parameter_search_id)
+            select(ParameterSearch).filter(ParameterSearch.id == id_parameter_search)
         )
         return result.scalar_one_or_none()
     except SQLAlchemyError as e:
@@ -50,12 +50,12 @@ async def get_parameter_search_by_id(
 
 
 async def list_parameter_searches_for_search(
-    db: DbSession, search_id: uuid.UUID
+    db: DbSession, id_search: uuid.UUID
 ) -> List[ParameterSearch]:
-    logger.debug(f"Listing parameter_searches for search_id: {search_id}")
+    logger.debug(f"Listing parameter_searches for id_search: {id_search}")
     try:
         result = await db.execute(
-            select(ParameterSearch).filter(ParameterSearch.search_id == search_id)
+            select(ParameterSearch).filter(ParameterSearch.id_search == id_search)
         )
         return result.scalars().all()
     except SQLAlchemyError as e:
@@ -64,23 +64,23 @@ async def list_parameter_searches_for_search(
 
 
 async def delete_parameter_search(
-    db: DbSession, parameter_search_id: uuid.UUID
+    db: DbSession, id_parameter_search: uuid.UUID
 ) -> bool:
-    logger.info(f"Deleting parameter_search ID: {parameter_search_id}")
+    logger.info(f"Deleting parameter_search ID: {id_parameter_search}")
     try:
         result = await db.execute(
-            select(ParameterSearch).filter(ParameterSearch.id == parameter_search_id)
+            select(ParameterSearch).filter(ParameterSearch.id == id_parameter_search)
         )
         parameter_search = result.scalar_one_or_none()
         if parameter_search:
             await db.delete(parameter_search)
             await db.commit()
             logger.info(
-                f"ParameterSearch ID {parameter_search_id} deleted successfully."
+                f"ParameterSearch ID {id_parameter_search} deleted successfully."
             )
             return True
         else:
-            logger.warning(f"ParameterSearch ID {parameter_search_id} not found.")
+            logger.warning(f"ParameterSearch ID {id_parameter_search} not found.")
             return False
     except SQLAlchemyError as e:
         logger.error(f"Database error occurred while deleting ParameterSearch: {e}")

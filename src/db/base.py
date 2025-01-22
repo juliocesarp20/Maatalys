@@ -1,9 +1,12 @@
+from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
+# Define a MetaData object with the schema
+metadata = MetaData(schema="maatalys")
 
-@as_declarative()
+
+@as_declarative(metadata=metadata)
 class Base:
-    id: int
     __name__: str
 
     @declared_attr

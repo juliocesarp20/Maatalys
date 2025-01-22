@@ -1,19 +1,22 @@
-from typing import List, Optional
+import datetime
+from typing import List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
 
 
 class ParameterSearchCreate(BaseModel):
-    parameter_id: Optional[UUID] = Field(None, alias="parameterId")
-    name: Optional[str]
-    value: str
+    id_parameter: Optional[UUID] = Field(None, alias="parameterId")
+    nm_parameter: Optional[str]
+    vl_parameter_search: str
 
     @model_validator(mode="before")
     @classmethod
     def validate_one_of_required(cls, values):
-        if not (values.get("parameter_id") or values.get("name")):
-            raise ValueError("Either 'parameter_id' or 'name' must be provided.")
+        if not (values.get("id_parameter") or values.get("nm_parameter")):
+            raise ValueError(
+                "Either 'id_parameter' or 'nm_parameter' must be provided."
+            )
         return values
 
 
@@ -23,14 +26,14 @@ class SearchCreate(BaseModel):
 
 
 class InvestigationCreate(BaseModel):
-    name: str
+    nm_investigation: str
     searches: List[SearchCreate]
 
 
 class ParameterSearchResponse(BaseModel):
     id: UUID
-    parameter_id: UUID
-    value: str
+    id_parameter: UUID
+    vl_parameter_search: str
 
     class Config:
         from_attributes = True
@@ -39,6 +42,10 @@ class ParameterSearchResponse(BaseModel):
 class SearchResponse(BaseModel):
     id: UUID
     source: str
+    dt_creation: datetime.datetime
+    dt_processing: Union[datetime.datetime, None]
+    dt_finished: Union[datetime.datetime, None]
+    dt_cancelled: Union[datetime.datetime, None]
     parameter_searches: List[ParameterSearchResponse]
 
     class Config:
@@ -47,7 +54,7 @@ class SearchResponse(BaseModel):
 
 class InvestigationResponse(BaseModel):
     id: UUID
-    name: str
+    nm_investigation: str
     searches: List[SearchResponse]
 
     class Config:
