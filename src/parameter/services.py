@@ -48,7 +48,7 @@ class ParameterService:
         """
         logger.info(f"Creating parameters: {parameter_names}")
         try:
-            new_parameters = [Parameter(name=name) for name in parameter_names]
+            new_parameters = [Parameter(nm_parameter=name) for name in parameter_names]
             db.add_all(new_parameters)
 
             if auto_commit:
@@ -74,7 +74,7 @@ class ParameterService:
         logger.debug(f"Fetching parameter by ID: {id_parameter}")
         try:
             result = await db.execute(
-                select(Parameter).filter(Parameter.id == id_parameter)
+                select(Parameter).filter(Parameter.id_parameter == id_parameter)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:
@@ -100,7 +100,7 @@ class ParameterService:
         logger.info(f"Deleting parameter ID: {id_parameter}")
         try:
             result = await db.execute(
-                select(Parameter).filter(Parameter.id == id_parameter)
+                select(Parameter).filter(Parameter.id_parameter == id_parameter)
             )
             parameter = result.scalar_one_or_none()
             if parameter:

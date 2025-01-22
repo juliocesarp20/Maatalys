@@ -21,23 +21,23 @@ class AuthService:
     async def authenticate_user(
         self,
         db: DbSession,
-        username: str,
+        nm_user: str,
         password: str,
     ) -> Optional[User]:
         """
-        Authenticate the user by validating the username and password.
+        Authenticate the user by validating the nm_user and password.
         """
-        logger.debug(f"Authenticating user: {username}")
-        user = await user_service.get_user_by_username(db, username)
+        logger.debug(f"Authenticating user: {nm_user}")
+        user = await user_service.get_user_by_username(db, nm_user)
         if not user:
-            logger.warning(f"Authentication failed: User {username} not found.")
+            logger.warning(f"Authentication failed: User {nm_user} not found.")
             return None
         if not PasswordManager.verify_password(password, user.hashed_password):
             logger.warning(
-                f"Authentication failed: Invalid password for user {username}."
+                f"Authentication failed: Invalid password for user {nm_user}."
             )
             return None
-        logger.info(f"User {username} authenticated successfully.")
+        logger.info(f"User {nm_user} authenticated successfully.")
         return user
 
     def create_access_token(
@@ -72,15 +72,15 @@ class AuthService:
             payload = jwt.decode(
                 token, auth_settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM]
             )
-            username: str = payload.get("sub")
-            if username is None:
+            nm_user: str = payload.get("sub")
+            if nm_user is None:
                 raise credentials_exception
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired")
         except jwt.InvalidTokenError:
             raise credentials_exception
 
-        user = await user_service.get_user_by_username(db, username)
+        user = await user_service.get_user_by_username(db, nm_user)
         if user is None:
             raise credentials_exception
 

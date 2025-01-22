@@ -7,15 +7,16 @@ from src.parameter_search.schemas import ParameterSearchCreate, ParameterSearchR
 
 
 class SearchBase(BaseModel):
-    source: str
+    nm_source: str
     parameters: List[ParameterSearchCreate]
 
 
 class SearchCreate(SearchBase):
+    id_investigation: str
     pass
 
 
 class SearchResponse(BaseModel):
     id: UUID
-    source: str
+    nm_source: str
     parameter_searches: List[ParameterSearchResponse]

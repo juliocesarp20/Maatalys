@@ -41,7 +41,9 @@ async def get_parameter_search_by_id(
     logger.debug(f"Fetching parameter_search by ID: {id_parameter_search}")
     try:
         result = await db.execute(
-            select(ParameterSearch).filter(ParameterSearch.id == id_parameter_search)
+            select(ParameterSearch).filter(
+                ParameterSearch.id_parameter_search == id_parameter_search
+            )
         )
         return result.scalar_one_or_none()
     except SQLAlchemyError as e:
@@ -69,7 +71,9 @@ async def delete_parameter_search(
     logger.info(f"Deleting parameter_search ID: {id_parameter_search}")
     try:
         result = await db.execute(
-            select(ParameterSearch).filter(ParameterSearch.id == id_parameter_search)
+            select(ParameterSearch).filter(
+                ParameterSearch.id_parameter_search == id_parameter_search
+            )
         )
         parameter_search = result.scalar_one_or_none()
         if parameter_search:

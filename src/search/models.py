@@ -18,7 +18,7 @@ class Search(Base):
     id_search: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
-    source: Mapped[str] = mapped_column(String, nullable=False)
+    nm_source: Mapped[str] = mapped_column(String, nullable=False)
     id_investigation: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("tb_investigation.id_investigation"),

@@ -26,7 +26,7 @@ async def create_new_investigation(
     kafka_producer: KafkaProducer,
 ):
     investigation = await investigation_service.create_investigation(
-        db, investigation, current_user.id, kafka_producer
+        db, investigation, current_user.id_user, kafka_producer
     )
     return investigation
 
@@ -50,4 +50,4 @@ async def get_user_investigations(
         InvestigationService, Depends(InvestigationService)
     ],
 ):
-    return await investigation_service.list_investigations(db, current_user.id)
+    return await investigation_service.list_investigations(db, current_user.id_user)

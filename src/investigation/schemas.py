@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, model_validator
 class ParameterSearchCreate(BaseModel):
     id_parameter: Optional[UUID] = Field(None, alias="parameterId")
     nm_parameter: Optional[str]
-    vl_parameter_search: str
+    vl_parameter: str
 
     @model_validator(mode="before")
     @classmethod
@@ -21,7 +21,7 @@ class ParameterSearchCreate(BaseModel):
 
 
 class SearchCreate(BaseModel):
-    source: str
+    nm_source: str
     parameters: List[ParameterSearchCreate]
 
 
@@ -31,7 +31,7 @@ class InvestigationCreate(BaseModel):
 
 
 class ParameterSearchResponse(BaseModel):
-    id: UUID
+    id_parameter_search: UUID
     id_parameter: UUID
     vl_parameter_search: str
 
@@ -40,10 +40,10 @@ class ParameterSearchResponse(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    id: UUID
-    source: str
-    dt_creation: datetime.datetime
-    dt_processing: Union[datetime.datetime, None]
+    id_search: UUID
+    nm_source: str
+    dt_created: datetime.datetime
+    dt_processed: Union[datetime.datetime, None]
     dt_finished: Union[datetime.datetime, None]
     dt_cancelled: Union[datetime.datetime, None]
     parameter_searches: List[ParameterSearchResponse]
@@ -53,7 +53,7 @@ class SearchResponse(BaseModel):
 
 
 class InvestigationResponse(BaseModel):
-    id: UUID
+    id_investigation: UUID
     nm_investigation: str
     searches: List[SearchResponse]
 

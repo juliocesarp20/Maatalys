@@ -61,11 +61,13 @@ class InvestigationService:
                 id_user=id_user,
                 searches=[
                     Search(
-                        source=search_data.source,
+                        nm_source=search_data.nm_source,
                         parameter_searches=[
                             ParameterSearch(
-                                id_parameter=parameter_map[param.nm_parameter].id,
-                                value=param.vl_parameter_search,
+                                id_parameter=parameter_map[
+                                    param.nm_parameter
+                                ].id_parameter,
+                                vl_parameter_search=param.vl_parameter,
                             )
                             for param in search_data.parameters
                             if param.nm_parameter in parameter_map
@@ -94,7 +96,7 @@ class InvestigationService:
                 "abc",
                 json.dumps(
                     {
-                        "id": str(investigation_response.id),
+                        "id": str(investigation_response.id_investigation),
                         "name": investigation_response.nm_investigation,
                     }
                 ),
@@ -122,7 +124,7 @@ class InvestigationService:
                         Search.parameter_searches
                     ),
                 )
-                .filter(Investigation.id == id_investigation)
+                .filter(Investigation.id_investigation == id_investigation)
             )
             return result.scalar_one_or_none()
         except SQLAlchemyError as e:

@@ -31,12 +31,12 @@ def upgrade() -> None:
     op.create_table(
         "tb_user",
         sa.Column("id_user", sa.UUID(), nullable=False),
-        sa.Column("username", sa.String(), nullable=False),
+        sa.Column("nm_user", sa.String(), nullable=False),
         sa.Column("hashed_password", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id_user"),
         sa.UniqueConstraint("id_user"),
     )
-    op.create_index(op.f("ix_tb_user_username"), "tb_user", ["username"], unique=True)
+    op.create_index(op.f("ix_tb_user_username"), "tb_user", ["nm_user"], unique=True)
     op.create_table(
         "tb_investigation",
         sa.Column("id_investigation", sa.UUID(), nullable=False),
@@ -57,7 +57,7 @@ def upgrade() -> None:
     op.create_table(
         "tb_search",
         sa.Column("id_search", sa.UUID(), nullable=False),
-        sa.Column("source", sa.String(), nullable=False),
+        sa.Column("nm_source", sa.String(), nullable=False),
         sa.Column("id_investigation", sa.UUID(), nullable=False),
         sa.Column(
             "dt_creation",

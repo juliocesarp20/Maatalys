@@ -15,7 +15,7 @@ async def register_user(
     db: DbSession,
     user_service: Annotated[UserService, Depends(UserService)],
 ):
-    existing_user = await user_service.get_user_by_username(db, user.username)
+    existing_user = await user_service.get_user_by_username(db, user.nm_user)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username already taken")
+        raise HTTPException(status_code=400, detail="nm_user already taken")
     return await user_service.create_user(db, user)

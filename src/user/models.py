@@ -17,7 +17,7 @@ class User(Base):
         unique=True,
         nullable=False,
     )
-    username: Mapped[str] = mapped_column(
+    nm_user: Mapped[str] = mapped_column(
         String, unique=True, index=True, nullable=False
     )
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)

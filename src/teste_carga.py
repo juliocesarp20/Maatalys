@@ -12,7 +12,7 @@ payload = {
     "name": "Investigation Example",
     "searches": [
         {
-            "source": "Source 1",
+            "nm_source": "nm_source 1",
             "parameters": [
                 {"name": "param_1_name", "value": "param_1_value"},
                 {"name": "param_2_name", "value": "param_2_value"},

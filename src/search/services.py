@@ -26,17 +26,19 @@ class SearchService:
         """
         Create a new search and persist it to the database.
         """
-        logger.info(f"Creating search with source: {search_data.source}")
+        logger.info(f"Creating search with nm_source: {search_data.nm_source}")
         new_search = Search(
             id_investigation=search_data.id_investigation,
-            source=search_data.source,
+            nm_source=search_data.nm_source,
             parameters=search_data.parameters,
         )
         try:
             db.add(new_search)
             await db.commit()
             await db.refresh(new_search)
-            logger.info(f"Search for source {search_data.source} created successfully.")
+            logger.info(
+                f"Search for nm_source {search_data.nm_source} created successfully."
+            )
             return new_search
         except SQLAlchemyError as e:
             logger.error(f"Database error occurred while creating search: {e}")
@@ -79,7 +81,9 @@ class SearchService:
         """
         logger.info(f"Deleting search ID: {id_search}")
         try:
-            result = await db.execute(select(Search).filter(Search.id == id_search))
+            result = await db.execute(
+                select(Search).filter(Search.id_investigation == id_search)
+            )
             search = result.scalar_one_or_none()
             if search:
                 await db.delete(search)
