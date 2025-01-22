@@ -8,7 +8,7 @@ from src.db.base import Base
 
 
 class Parameter(Base):
-    __tablename__ = "parameter"
+    __tablename__ = "tb_parameter"
 
     id_parameter: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

@@ -13,14 +13,16 @@ tp_status_values = Literal["WAITING", "FINISHED", "PROCESSING", "ERROR", "CANCEL
 
 
 class Search(Base):
-    __tablename__ = "search"
+    __tablename__ = "tb_search"
 
     id_search: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
     source: Mapped[str] = mapped_column(String, nullable=False)
     id_investigation: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("investigation.id_investigation"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("tb_investigation.id_investigation"),
+        nullable=False,
     )
 
     dt_creation: Mapped[datetime] = mapped_column(
