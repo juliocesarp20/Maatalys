@@ -4,8 +4,8 @@ from sqlalchemy import UUID, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import Base
-from src.parameter.models import Parameter  # Ensure the Parameter model is imported
-from src.search.models import Search  # Ensure the Search model is imported
+from src.parameter.models import Parameter
+from src.search.models import Search
 
 
 class ParameterSearch(Base):
