@@ -85,3 +85,11 @@ Thumbs.db
 
 .env
 poetry.lock
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.plan
+*.log
+
+terraform.tfvars
