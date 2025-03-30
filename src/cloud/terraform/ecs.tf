@@ -14,6 +14,7 @@ resource "aws_lb_target_group" "ecs_tg" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
+  target_type = "ip"
 
   health_check {
     interval            = 30
@@ -31,9 +32,15 @@ resource "aws_lb_listener" "ecs_alb_listener" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    type = "fixed-response"
+    fixed_response {
+      status_code = 200
+      message_body = "No target"
+      content_type = "text/plain"
+    }
   }
+
+  depends_on = [aws_lb_target_group.ecs_tg]
 }
 
 resource "aws_autoscaling_group" "ecs_asg_maatalys" {
@@ -73,25 +80,13 @@ resource "aws_ecs_capacity_provider" "ecs_capacity_provider_maatalys" {
   name = "webapp-cp"
 
   auto_scaling_group_provider {
-    auto_scaling_group_arn = aws_autoscaling_group.ecs_asg_maatalys.id
+    auto_scaling_group_arn = aws_autoscaling_group.ecs_asg_maatalys.arn
     managed_scaling {
       maximum_scaling_step_size = 1000
       minimum_scaling_step_size = 1
       status                    = "ENABLED"
       target_capacity           = 100
     }
-    
-  } 
-}
-
-resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers_maatalys" {
-  cluster_name = aws_ecs_cluster.ecs_cluster_maatalys.name
-  capacity_providers = [aws_ecs_capacity_provider.ecs_capacity_provider_maatalys.name]
-  
-  default_capacity_provider_strategy {
-    base  = 1
-    weight = 100
-    capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider_maatalys.name
   }
 }
 
