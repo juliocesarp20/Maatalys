@@ -133,23 +133,28 @@ jobs:
             
             jq '.taskDefinition' task-def-full.json > task-def.json
 
-        - name: Create clean task definition
+        - name: Clean task definition for registration
           run: |
+            # Capture the container definitions and other fields from task-def.json
             CONTAINER_DEFS=$(jq '.containerDefinitions' task-def.json)
-            
+            CPU=$(jq -r '.cpu // "256"' task-def.json)
+            MEMORY=$(jq -r '.memory // "512"' task-def.json)
+            EXECUTION_ROLE=$(jq -r '.executionRoleArn // "null"' task-def.json)
+            TASK_ROLE=$(jq -r '.taskRoleArn // "null"' task-def.json)
+            NETWORK_MODE=$(jq -r '.networkMode // "awsvpc"' task-def.json)
+
+            # Create clean JSON with proper quoting for string values
             cat <<EOF > clean-task-def.json
             {
-              "family": "${{ env.ECS_TASK_DEFINITION_FAMILY }}",
+              "family": "maatalys-task",
               "containerDefinitions": ${CONTAINER_DEFS},
-              "cpu": $(jq -r '.cpu // "256"' task-def.json),
-              "memory": $(jq -r '.memory // "512"' task-def.json),
-              "executionRoleArn": $(jq -r '.executionRoleArn // "null"' task-def.json),
-              "taskRoleArn": $(jq -r '.taskRoleArn // "null"' task-def.json),
-              "networkMode": $(jq -r '.networkMode // "\"awsvpc\""' task-def.json)
+              "cpu": "$CPU",
+              "memory": "$MEMORY",
+              "executionRoleArn": "$EXECUTION_ROLE",
+              "taskRoleArn": "$TASK_ROLE",
+              "networkMode": "$NETWORK_MODE"
             }
             EOF
-            
-            jq --arg IMAGE "${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}" '.containerDefinitions[0].image = $IMAGE' clean-task-def.json > updated-task-def.json
-            
-            echo "Updated task definition:"
-            cat updated-task-def.json
+
+                echo "Cleaned task definition:"
+                cat clean-task-def.json
