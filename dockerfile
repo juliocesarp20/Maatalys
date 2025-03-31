@@ -5,11 +5,10 @@ ENV APP_HOME /app
 
 WORKDIR ${APP_HOME}
 
-COPY pyproject.toml poetry.lock /app/
+COPY . /app
+
 RUN pip install poetry \
     && poetry install --no-interaction --no-ansi
-
-COPY . /app
 
 EXPOSE 8000
 
