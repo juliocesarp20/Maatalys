@@ -88,9 +88,9 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-buildx-
 
-        # - name: Build Docker image
-        #   run: |
-        #     docker build -f Dockerfile -t ${{ secrets.ECR_REPOSITORY }} . || exit 1
+        - name: Build Docker image
+          run: |
+            docker build -f Dockerfile -t ${{ secrets.ECR_REPOSITORY }} . || exit 1
 
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v4
