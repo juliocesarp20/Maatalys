@@ -1,2 +1,2 @@
-ami_maatalys = "ami-0efc43a4067fe9a3e"
+ami_maatalys = "ami-01fc1a0cbf420a68d"
 instance_type = "t3.micro"
