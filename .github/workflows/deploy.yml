@@ -121,20 +121,28 @@ jobs:
         - name: Get current task definition
           id: task-def
           run: |
-            TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION_FAMILY }} --query "taskDefinition" --output json)
-            echo "TASK_DEFINITION=$TASK_DEFINITION" >> $GITHUB_ENV
-            echo "TASK_DEFINITION_REVISION=$(echo "$TASK_DEFINITION" | jq -r '.revision')" >> $GITHUB_ENV
+            aws ecs describe-task-definition \
+              --task-definition ${{ env.ECS_TASK_DEFINITION_FAMILY }} \
+              --query "taskDefinition" \
+              --output json > task-def.json
+
+            TASK_DEFINITION_REVISION=$(jq -r '.revision' task-def.json)
+            echo "TASK_DEFINITION_REVISION=$TASK_DEFINITION_REVISION" >> $GITHUB_ENV
 
         - name: Update task definition with new image
           run: |
-            UPDATED_TASK_DEFINITION=$(echo "${{ env.TASK_DEFINITION }}" | jq ".containerDefinitions[0].image = \"${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}\"")
-            echo "UPDATED_TASK_DEFINITION=$UPDATED_TASK_DEFINITION" >> $GITHUB_ENV
+            UPDATED_TASK_DEFINITION=$(jq ".containerDefinitions[0].image = \"${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}\"" task-def.json)
+            echo "$UPDATED_TASK_DEFINITION" > updated-task-def.json
 
         - name: Register new task definition
           id: register-task-def
           run: |
-            NEW_TASK_DEFINITION=$(aws ecs register-task-definition --family ${{ env.ECS_TASK_DEFINITION_FAMILY }} --container-definitions "${{ env.UPDATED_TASK_DEFINITION }}" --network-mode awsvpc --requires-compatibilities FARGATE --cpu 256 --memory 512 --query "taskDefinition.taskDefinitionArn" --output text)
+            NEW_TASK_DEFINITION=$(aws ecs register-task-definition \
+              --cli-input-json file://updated-task-def.json \
+              --query "taskDefinition.taskDefinitionArn" \
+              --output text)
             echo "NEW_TASK_DEFINITION=$NEW_TASK_DEFINITION" >> $GITHUB_ENV
+
 
         - name: Update ECS service with new task definition
           run: |
