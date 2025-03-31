@@ -66,18 +66,18 @@ kafka_producer_service = KafkaProducerService(kafka_settings)
 kafka_consumer_service = KafkaConsumerService(settings=kafka_settings)
 
 
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Starting application...")
-    await kafka_producer_service.start()
-    await kafka_consumer_service.start()
-    import asyncio
+# @app.on_event("startup")
+# async def startup_event():
+#     logger.info("Starting application...")
+#     await kafka_producer_service.start()
+#     await kafka_consumer_service.start()
+#     import asyncio
 
-    asyncio.create_task(kafka_consumer_service.consume())
+#     asyncio.create_task(kafka_consumer_service.consume())
 
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("Shutting down application...")
-    await kafka_producer_service.stop()
-    await kafka_consumer_service.stop()
+# @app.on_event("shutdown")
+# async def shutdown_event():
+#     logger.info("Shutting down application...")
+#     await kafka_producer_service.stop()
+#     await kafka_consumer_service.stop()
