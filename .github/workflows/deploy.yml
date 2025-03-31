@@ -121,49 +121,35 @@ jobs:
         - name: Get current task definition
           id: task-def
           run: |
-            aws ecs describe-task-definition \
+            TASK_DEF_ARN=$(aws ecs describe-task-definition \
               --task-definition ${{ env.ECS_TASK_DEFINITION_FAMILY }} \
-              --query "taskDefinition" \
-              --output json > task-def.json
-
-        - name: Extract clean task definition
-          run: |
-            jq '{
-              family: .family,
-              taskRoleArn: .taskRoleArn,
-              executionRoleArn: .executionRoleArn,
-              networkMode: .networkMode,
-              containerDefinitions: .containerDefinitions,
-              volumes: .volumes,
-              placementConstraints: .placementConstraints,
-              requiresCompatibilities: .requiresCompatibilities,
-              cpu: .cpu,
-              memory: .memory,
-              tags: .tags,
-              pidMode: .pidMode,
-              ipcMode: .ipcMode,
-              proxyConfiguration: .proxyConfiguration,
-              inferenceAccelerators: .inferenceAccelerators,
-              ephemeralStorage: .ephemeralStorage,
-              runtimePlatform: .runtimePlatform
-            } | del(.[][] | nulls) | del(.[] | nulls)' task-def.json > clean-task-def.json
-            
-            jq --arg IMAGE "${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}" '.containerDefinitions[0].image = $IMAGE' clean-task-def.json > updated-task-def.json
-
-        - name: Register new task definition
-          id: register-task-def
-          run: |
-            NEW_TASK_DEFINITION=$(aws ecs register-task-definition \
-              --cli-input-json file://updated-task-def.json \
               --query "taskDefinition.taskDefinitionArn" \
               --output text)
-            echo "NEW_TASK_DEFINITION=$NEW_TASK_DEFINITION" >> $GITHUB_ENV
+            
+            aws ecs describe-task-definition \
+              --task-definition $TASK_DEF_ARN \
+              --include TAGS \
+              --output json > task-def-full.json
+            
+            jq '.taskDefinition' task-def-full.json > task-def.json
 
-        - name: Update ECS service with new task definition
+        - name: Create clean task definition
           run: |
-            aws ecs update-service \
-              --cluster ${{ env.ECS_CLUSTER_NAME }} \
-              --service ${{ env.ECS_SERVICE_NAME }} \
-              --task-definition ${{ env.NEW_TASK_DEFINITION }} \
-              --force-new-deployment \
-              --region ${{ secrets.AWS_REGION }} || exit 1
+            CONTAINER_DEFS=$(jq '.containerDefinitions' task-def.json)
+            
+            cat <<EOF > clean-task-def.json
+            {
+              "family": "${{ env.ECS_TASK_DEFINITION_FAMILY }}",
+              "containerDefinitions": ${CONTAINER_DEFS},
+              "cpu": $(jq -r '.cpu // "256"' task-def.json),
+              "memory": $(jq -r '.memory // "512"' task-def.json),
+              "executionRoleArn": $(jq -r '.executionRoleArn // "null"' task-def.json),
+              "taskRoleArn": $(jq -r '.taskRoleArn // "null"' task-def.json),
+              "networkMode": $(jq -r '.networkMode // "\"awsvpc\""' task-def.json)
+            }
+            EOF
+            
+            jq --arg IMAGE "${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}" '.containerDefinitions[0].image = $IMAGE' clean-task-def.json > updated-task-def.json
+            
+            echo "Updated task definition:"
+            cat updated-task-def.json
