@@ -126,13 +126,29 @@ jobs:
               --query "taskDefinition" \
               --output json > task-def.json
 
-            TASK_DEFINITION_REVISION=$(jq -r '.revision' task-def.json)
-            echo "TASK_DEFINITION_REVISION=$TASK_DEFINITION_REVISION" >> $GITHUB_ENV
-
-        - name: Update task definition with new image
+        - name: Extract clean task definition
           run: |
-            UPDATED_TASK_DEFINITION=$(jq ".containerDefinitions[0].image = \"${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}\"" task-def.json)
-            echo "$UPDATED_TASK_DEFINITION" > updated-task-def.json
+            jq '{
+              family: .family,
+              taskRoleArn: .taskRoleArn,
+              executionRoleArn: .executionRoleArn,
+              networkMode: .networkMode,
+              containerDefinitions: .containerDefinitions,
+              volumes: .volumes,
+              placementConstraints: .placementConstraints,
+              requiresCompatibilities: .requiresCompatibilities,
+              cpu: .cpu,
+              memory: .memory,
+              tags: .tags,
+              pidMode: .pidMode,
+              ipcMode: .ipcMode,
+              proxyConfiguration: .proxyConfiguration,
+              inferenceAccelerators: .inferenceAccelerators,
+              ephemeralStorage: .ephemeralStorage,
+              runtimePlatform: .runtimePlatform
+            } | del(.[][] | nulls) | del(.[] | nulls)' task-def.json > clean-task-def.json
+            
+            jq --arg IMAGE "${{ secrets.ECR_URI }}:${{ env.IMAGE_TAG }}" '.containerDefinitions[0].image = $IMAGE' clean-task-def.json > updated-task-def.json
 
         - name: Register new task definition
           id: register-task-def
@@ -143,12 +159,11 @@ jobs:
               --output text)
             echo "NEW_TASK_DEFINITION=$NEW_TASK_DEFINITION" >> $GITHUB_ENV
 
-
         - name: Update ECS service with new task definition
           run: |
             aws ecs update-service \
               --cluster ${{ env.ECS_CLUSTER_NAME }} \
               --service ${{ env.ECS_SERVICE_NAME }} \
-              --task-definition ${{ steps.register-task-def.outputs.NEW_TASK_DEFINITION }} \
+              --task-definition ${{ env.NEW_TASK_DEFINITION }} \
               --force-new-deployment \
               --region ${{ secrets.AWS_REGION }} || exit 1
