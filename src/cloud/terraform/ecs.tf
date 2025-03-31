@@ -67,7 +67,7 @@ resource "aws_autoscaling_group" "ecs_asg_maatalys" {
 }
 
 resource "aws_ecs_cluster" "ecs_cluster_maatalys" {
-  name = "ecs-cluster-maatalys"
+  name = "ecs-cluster-${var.project_name}"
 }
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider_maatalys" {
@@ -87,7 +87,7 @@ resource "aws_ecs_capacity_provider" "ecs_capacity_provider_maatalys" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition_maatalys" {
-  family                   = "webapp"
+  family                   = "${var.project_name}-task"
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   cpu                      = "1024"
@@ -99,8 +99,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition_maatalys" {
   }
 
   container_definitions = jsonencode([{
-    name      = "webapp-ctr"
-    image     = "amazon/amazon-ecs-sample"
+    name  = "${var.project_name}-container"
+    image = var.image_url
     cpu       = 1024
     memory    = 512
     essential = true
@@ -113,7 +113,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_maatalys" {
 }
 
 resource "aws_ecs_service" "ecs_service_maatalys" {
-  name            = "webapp-svc"
+  name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.ecs_cluster_maatalys.id
   task_definition = aws_ecs_task_definition.ecs_task_definition_maatalys.arn
 
@@ -135,7 +135,7 @@ resource "aws_ecs_service" "ecs_service_maatalys" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
-    container_name   = "webapp-ctr"
+    container_name   = "${var.project_name}-container"
     container_port   = 80
   }
 

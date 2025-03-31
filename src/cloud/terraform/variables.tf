@@ -8,3 +8,16 @@ variable "instance_type" {
   type        = string
   default     = "t3.medium"
 }
+
+variable "project_name" {
+  description = "Nome do projeto"
+  type        = string
+  default     = "maatalys"
+}
+
+variable "image_url" {
+  description = "Nome base da imagem Docker"
+  type        = string
+  default     = "maatalys:latest"
+}
+
