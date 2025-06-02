@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, List, Optional, Tuple
+from typing import Annotated, Optional
 
 from aiokafka import AIOKafkaProducer
 from fastapi import Depends
@@ -58,7 +58,7 @@ class KafkaProducerService(EventProducerService):
             logger.error(f"Failed to publish message to topic '{topic}': {e}")
             raise
 
-    async def publish_many(self, event_list: List[Tuple[str, str]]) -> None:
+    async def publish_many(self, event_list: list[tuple[str, str]]) -> None:
         if self._producer is None:
             raise RuntimeError("Kafka producer is not started.")
         try:

@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
@@ -54,9 +54,9 @@ class SearchService:
 
     async def list_searches_by_investigation(
         self, db: DbSession, id_investigation: uuid.UUID
-    ) -> List[Search]:
+    ) -> list[Search]:
         """
-        List all searches for a specific investigation.
+        list all searches for a specific investigation.
         """
         logger.debug(f"Listing searches for investigation ID: {id_investigation}")
         try:

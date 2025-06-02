@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -22,7 +22,7 @@ async def create_new_parameter(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.get("/", response_model=List[ParameterResponse])
+@router.get("/", response_model=list[ParameterResponse])
 async def get_all_parameters(
     db: DbSession,
     parameter_service: Annotated[ParameterService, Depends(ParameterService)],

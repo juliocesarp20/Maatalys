@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -42,7 +42,7 @@ async def get_investigation(
     return await investigation_service.get_investigation_by_id(db, id_investigation)
 
 
-@router.get("/", response_model=List[InvestigationResponse])
+@router.get("/", response_model=list[InvestigationResponse])
 async def get_user_investigations(
     db: DbSession,
     current_user: CurrentUser,

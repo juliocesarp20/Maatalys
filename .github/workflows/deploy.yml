@@ -138,7 +138,6 @@ jobs:
 
         - name: Clean task definition for registration
           run: |
-            # Capture the container definitions and other fields from task-def.json
             CONTAINER_DEFS=$(jq '.containerDefinitions' task-def.json)
             CPU=$(jq -r '.cpu // "256"' task-def.json)
             MEMORY=$(jq -r '.memory // "512"' task-def.json)
@@ -146,7 +145,6 @@ jobs:
             TASK_ROLE=$(jq -r '.taskRoleArn // "null"' task-def.json)
             NETWORK_MODE=$(jq -r '.networkMode // "awsvpc"' task-def.json)
 
-            # Create clean JSON with proper quoting for string values
             cat <<EOF > clean-task-def.json
             {
               "family": "maatalys-task",

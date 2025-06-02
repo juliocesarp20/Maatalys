@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
 
 class EventProducerService(ABC):
@@ -8,5 +7,5 @@ class EventProducerService(ABC):
         pass
 
     @abstractmethod
-    async def publish_many(self, event_list: List[Tuple[str, str]]) -> None:
+    async def publish_many(self, event_list: list[tuple[str, str]]) -> None:
         pass

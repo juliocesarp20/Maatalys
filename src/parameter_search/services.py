@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
@@ -53,7 +53,7 @@ async def get_parameter_search_by_id(
 
 async def list_parameter_searches_for_search(
     db: DbSession, id_search: uuid.UUID
-) -> List[ParameterSearch]:
+) -> list[ParameterSearch]:
     logger.debug(f"Listing parameter_searches for id_search: {id_search}")
     try:
         result = await db.execute(

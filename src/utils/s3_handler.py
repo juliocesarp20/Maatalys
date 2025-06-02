@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class S3Handler(AWSHandler):
-    def __init__(self, region_name: str = None):
-        super().__init__(region_name)
+    def __init__(self):
+        super().__init__()
         self.s3_client = self.session.client("s3")
 
     def upload_file(self, file_path: str, bucket_name: str, object_name: str) -> bool:

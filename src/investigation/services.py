@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -133,9 +133,9 @@ class InvestigationService:
 
     async def list_investigations(
         self, db: DbSession, id_user: UUID
-    ) -> List[Investigation]:
+    ) -> list[Investigation]:
         """
-        List all investigations for a specific user with eager loading.
+        list all investigations for a specific user with eager loading.
         """
         logger.debug(f"Listing investigations for user ID: {id_user}")
         try:

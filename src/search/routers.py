@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -34,7 +34,7 @@ async def get_search(
     return search
 
 
-@router.get("/investigation/{id_investigation}", response_model=List[SearchResponse])
+@router.get("/investigation/{id_investigation}", response_model=list[SearchResponse])
 async def get_searches_for_investigation(
     id_investigation: UUID,
     db: DbSession,

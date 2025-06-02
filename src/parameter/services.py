@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
@@ -36,14 +36,14 @@ class ParameterService:
             raise RuntimeError("Database error: Unable to create parameter.")
 
     async def create_parameters(
-        self, db: DbSession, parameter_names: List[str], auto_commit: bool = True
-    ) -> List[Parameter]:
+        self, db: DbSession, parameter_names: list[str], auto_commit: bool = True
+    ) -> list[Parameter]:
         """
         Create multiple parameters in bulk.
 
         Args:
             db: Database session
-            parameter_names: List of parameter names to create
+            parameter_names: list of parameter names to create
             auto_commit: If True, commits immediately. If False, just adds to session
         """
         logger.info(f"Creating parameters: {parameter_names}")
@@ -81,9 +81,9 @@ class ParameterService:
             logger.error(f"Database error occurred while fetching parameter: {e}")
             raise RuntimeError("Database error: Unable to fetch parameter.")
 
-    async def list_parameters(self, db: DbSession) -> List[Parameter]:
+    async def list_parameters(self, db: DbSession) -> list[Parameter]:
         """
-        List all parameters.
+        list all parameters.
         """
         logger.debug("Listing all parameters.")
         try:

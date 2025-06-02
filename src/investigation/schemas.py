@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional, Union
+from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
@@ -22,12 +22,12 @@ class ParameterSearchCreate(BaseModel):
 
 class SearchCreate(BaseModel):
     nm_source: str
-    parameters: List[ParameterSearchCreate]
+    parameters: list[ParameterSearchCreate]
 
 
 class InvestigationCreate(BaseModel):
     nm_investigation: str
-    searches: List[SearchCreate]
+    searches: list[SearchCreate]
 
 
 class ParameterSearchResponse(BaseModel):
@@ -46,7 +46,7 @@ class SearchResponse(BaseModel):
     dt_processed: Union[datetime.datetime, None]
     dt_finished: Union[datetime.datetime, None]
     dt_cancelled: Union[datetime.datetime, None]
-    parameter_searches: List[ParameterSearchResponse]
+    parameter_searches: list[ParameterSearchResponse]
 
     class Config:
         from_attributes = True
@@ -55,7 +55,7 @@ class SearchResponse(BaseModel):
 class InvestigationResponse(BaseModel):
     id_investigation: UUID
     nm_investigation: str
-    searches: List[SearchResponse]
+    searches: list[SearchResponse]
 
     class Config:
         from_attributes = True
