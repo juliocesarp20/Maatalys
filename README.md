@@ -14,6 +14,18 @@ AWS ECS using Application Load Balancer (Note: For development purposes 2 public
 
 ![Sem título-2025-06-02-0242](https://github.com/user-attachments/assets/20df5f1e-4fbf-41b6-8326-36a37916820e)
 
+## TODO
+
+- [ ] Remove AWS tokens
+- [ ] Clean bad comments
+- [ ] Update private/public subnet
+- [ ] Deploy MSK
+- [ ] Add logic to send processed searches to the automation project using Kafka
+- [ ] Separate search/investigation processing logic for better scalability
+- [ ] Add integration tests
+- [ ] Add unit tests
+- [ ] Add refresh token for JWT
+
 
 
 
