@@ -20,6 +20,7 @@ AWS ECS using Application Load Balancer (Note: For development purposes 2 public
 - [ ] Clean bad comments
 - [ ] Update private/public subnet for ECS
 - [ ] Deploy MSK
+- [ ] Add Route 53
 - [ ] Add logic to send processed searches to the automation project using Kafka
 - [ ] Separate search/investigation processing logic for better scalability
 - [ ] Add integration tests
