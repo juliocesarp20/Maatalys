@@ -18,7 +18,7 @@ AWS ECS using Application Load Balancer (Note: For development purposes 2 public
 
 - [ ] Remove AWS access with tokens
 - [ ] Clean bad comments
-- [ ] Update private/public subnet
+- [ ] Update private/public subnet for ECS
 - [ ] Deploy MSK
 - [ ] Add logic to send processed searches to the automation project using Kafka
 - [ ] Separate search/investigation processing logic for better scalability
