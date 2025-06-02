@@ -16,7 +16,7 @@ AWS ECS using Application Load Balancer (Note: For development purposes 2 public
 
 ## TODO
 
-- [ ] Remove AWS tokens
+- [ ] Remove AWS access with tokens
 - [ ] Clean bad comments
 - [ ] Update private/public subnet
 - [ ] Deploy MSK
