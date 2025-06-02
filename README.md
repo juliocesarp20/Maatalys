@@ -1,5 +1,5 @@
 # Maatalys
-This is a webapp made to serve as the backbone API for a project that will aid in investigation public spending.  
+Maatalys is an API built to serve as the backbone for an investigation application focused on analyzing public spending. It provides the necessary infrastructure and tools for users to manage investigations and searches
 
 ## Tech
 - Python
