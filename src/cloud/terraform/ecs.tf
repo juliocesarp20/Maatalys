@@ -98,18 +98,59 @@ resource "aws_ecs_task_definition" "ecs_task_definition_maatalys" {
     cpu_architecture        = "X86_64"
   }
 
-  container_definitions = jsonencode([{
-    name  = "${var.project_name}-container"
-    image = var.image_url
-    cpu       = 1024
-    memory    = 512
-    essential = true
-    portMappings = [{
-      containerPort = 80
-      hostPort      = 80
-      protocol      = "tcp"
-    }]
-  }])
+   container_definitions = jsonencode([
+    {
+      name      = "${var.project_name}-container"
+      image     = var.image_url
+      cpu       = 1024
+      memory    = 512
+      essential = true
+
+      portMappings = [{
+        containerPort = 80
+        hostPort      = 80
+        protocol      = "tcp"
+      }]
+
+      environment = [
+        {
+          name  = "SQLALCHEMY_DATABASE_URI"
+          value = "postgresql+asyncpg://${var.db_username}:${var.db_password}@${aws_db_instance.postgres.address}:${aws_db_instance.postgres.port}/${var.db_name}"
+        },
+        { name = "DB_HOST",     value = aws_db_instance.postgres.address },
+        { name = "DB_PORT",     value = aws_db_instance.postgres.port },
+        { name = "DB_NAME",     value = var.db_name },
+        { name = "DB_USER",     value = var.db_username },
+        { name = "DB_PASSWORD", value = var.db_password },
+
+        { name = "DATABASE_ENGINE_POOL_SIZE",    value = "250" },
+        { name = "DATABASE_ENGINE_MAX_OVERFLOW", value = "10" },
+        { name = "DATABASE_ENGINE_POOL_PING",    value = "True" },
+
+        # -- Logging & Auth --
+        { name = "LOG_LEVEL",               value = "ERROR" },
+        { name = "SECRET_KEY",              value = "123BADX" },
+        { name = "ACCESS_TOKEN_EXPIRE_MINUTES", value = "3600" },
+        { name = "ALGORITHM",               value = "HS256" },
+
+        {
+          name  = "KAFKA_CLUSTER_NAME"
+          value = aws_msk_cluster.kafka.cluster_name
+        },
+        {
+          name  = "KAFKA_BOOTSTRAP_SERVERS"
+          value = aws_msk_cluster.kafka.bootstrap_brokers
+        },
+        { name = "KAFKA_SECURITY_PROTOCOL", value = "PLAINTEXT" },
+        { name = "KAFKA_SASL_MECHANISM",    value = "" },
+        { name = "KAFKA_SASL_USERNAME",     value = "" },
+        { name = "KAFKA_SASL_PASSWORD",     value = "" },
+        { name = "KAFKA_CLIENT_ID",         value = "maatalys-kafka" },
+
+        { name = "AWS_REGION",              value = "us-east-2" },
+      ]
+    }
+  ])
 }
 
 resource "aws_ecs_service" "ecs_service_maatalys" {
@@ -123,6 +164,7 @@ resource "aws_ecs_service" "ecs_service_maatalys" {
   }
 
   force_new_deployment = true
+    desired_count = 1
 
   triggers = {
     redeployment = timestamp()
