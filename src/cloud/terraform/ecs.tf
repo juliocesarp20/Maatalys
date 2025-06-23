@@ -57,8 +57,6 @@ resource "aws_autoscaling_group" "ecs_asg_maatalys" {
     propagate_at_launch = true
   }
 
-  # Removed target_group_arns from the ASG because ECS service will handle load balancer registration
-
   depends_on = [
     aws_lb.ecs_alb,
     aws_lb_target_group.ecs_tg,
@@ -118,7 +116,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition_maatalys" {
           value = "postgresql+asyncpg://${var.db_username}:${var.db_password}@${aws_db_instance.postgres.address}:${aws_db_instance.postgres.port}/${var.db_name}"
         },
         { name = "DB_HOST",     value = aws_db_instance.postgres.address },
-        { name = "DB_PORT",     value = aws_db_instance.postgres.port },
+        { name = "DB_PORT",     value = tostring(aws_db_instance.postgres.port) },
         { name = "DB_NAME",     value = var.db_name },
         { name = "DB_USER",     value = var.db_username },
         { name = "DB_PASSWORD", value = var.db_password },
